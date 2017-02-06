@@ -7,7 +7,7 @@ from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Fo
 print('\n********  SOAPY ********\n')
 
 patient = input('Patient name: ' )
-num_goals = int(input('number of goals: ' ))
+num_goals = int(input('Number of goals: ' ))
 goals = []
 
 # get goals from user
@@ -24,6 +24,9 @@ ws = wb.active
 ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
 ws.print_options.gridLines = True
 ws.title = patient
+ws.page_margins.left = 0.25
+ws.page_margins.right = 0.25
+ws.page_margins.bottom = 0.5
 
 ft_heading = Font(size=11, bold=True)
 
