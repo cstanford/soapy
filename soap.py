@@ -1,3 +1,13 @@
+'''
+*************************************************
+* Soapy                                         *
+* 		                                        *
+* A Simple script for creating SLP SOAP notes.  * 
+* 											    *
+************************************************* 
+'''
+
+import argparse
 from openpyxl import Workbook
 from openpyxl.compat import range
 from openpyxl.utils import get_column_letter
@@ -16,7 +26,7 @@ for i in range(0,num_goals):
 	goals.append(goal)
 
 # later we wil update filname to day of week?
-dest_filename = 'testSoap.xlsx'
+dest_filename = patient + '.xlsx'
 
 # worksheet title is patients name
 wb = Workbook()
@@ -71,3 +81,4 @@ goal_index = 5	# where to start inserting goals
 inputData(goal_index, heading_index)
 
 wb.save(filename=dest_filename)
+print('\n' + dest_filename + ' created.\n')
