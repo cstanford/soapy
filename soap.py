@@ -2,8 +2,8 @@
 *************************************************
 * Soapy                                         *
 * 		                                        *
-* A Simple script for creating SLP SOAP notes.  *
-* 											    *
+* A Simple script for creating SLP SOAP notes   *
+* in ms excel 									*
 *************************************************
 '''
 
@@ -45,10 +45,11 @@ if new_wb:
 	ws = wb.active
 	ws.title = patient
 else:
-	if patient in wb.sheetnames: # delete sheet if it already exists
+	if patient in wb.sheetnames: # delete patient's worksheet if it already exists
 		wb.remove(wb[patient])
-	ws = wb.create_sheet(title=patient)
+	ws = wb.create_sheet(title=patient) # create a new sheet for the patient. 
 
+# set up print options 
 ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
 ws.print_options.gridLines = True
 ws.page_margins.left = 0.25
@@ -113,4 +114,4 @@ else:
 	inputData(goal_index,heading_index,num_goals)
 
 wb.save(filename=dest_filename)
-print('\n' + dest_filename + ' created.\n')
+print('\nSuccessfully updated ' + dest_filename + '.\n')
