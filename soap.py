@@ -2,20 +2,35 @@
 *************************************************
 * Soapy                                         *
 * 		                                        *
-* A Simple script for creating SLP SOAP notes.  * 
+* A Simple script for creating SLP SOAP notes.  *
 * 											    *
-************************************************* 
+*************************************************
 '''
 
 import argparse
+import os
 from openpyxl import Workbook
+from openpyxl import load_workbook
 from openpyxl.compat import range
 from openpyxl.utils import get_column_letter
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 
+parser = argparse.ArgumentParser()
+parser.add_argument('filename')
+args = parser.parse_args()
+filename = args.filename
 
-print('\n********  SOAPY ********\n')
+# open workbook if exists
+dest_filename = filename + '.xlsx'
+if os.path.isfile(dest_filename):
+	wb = load_workbook(filename = dest_filename)
+	new_wb = False
+else:
+	wb = Workbook()
+	new_wb = True
 
+print('\n***********  SOAPY ***********')
+print('Be sure that excel is not open!\n')
 patient = input('Patient name: ' )
 num_goals = int(input('Number of goals: ' ))
 goals = []
@@ -25,15 +40,17 @@ for i in range(0,num_goals):
 	goal = input('Goal ' + str(i + 1) + ': ')
 	goals.append(goal)
 
-# later we wil update filname to day of week?
-dest_filename = patient + '.xlsx'
 
-# worksheet title is patients name
-wb = Workbook()
-ws = wb.active
+if new_wb:
+	ws = wb.active
+	ws.title = patient
+else:
+	if patient in wb.sheetnames: # delete sheet if it already exists
+		wb.remove(wb[patient])
+	ws = wb.create_sheet(title=patient)
+
 ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
 ws.print_options.gridLines = True
-ws.title = patient
 ws.page_margins.left = 0.25
 ws.page_margins.right = 0.25
 ws.page_margins.bottom = 0.5
