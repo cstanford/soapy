@@ -83,19 +83,34 @@ def insertGoals(startRow):
 		cell_num = 'C' + str(goal)
 		cell = ws[cell_num].value = goals[goal - startRow]
 
-def inputData(goal_index, heading_index):
+def inputData(goal_index, heading_index, offset):
 	for i in range(0, 4):
-		ws.merge_cells('B' + str(goal_index) +':B' + str(goal_index + num_goals - 1)) # merges subjective note cells
+		ws.merge_cells('B' + str(goal_index) +':B' + str(goal_index + offset - 1)) # merges subjective note cells
 		insertHeading(heading_index)
 		insertGoals(goal_index)
-		heading_index += num_goals + 3
-		goal_index += num_goals + 3
+		heading_index += offset + 3
+		goal_index += offset + 3
 
 
 heading_index = 4 # where to start inserting heading row
 goal_index = 5	# where to start inserting goals
 
-inputData(goal_index, heading_index)
+
+custom_offset = 4 # Use if num_goals < 4 to make room for subjective notes. 
+use_custom_offset = False
+
+# If num_goals < 4, we use a custom offset.
+# The custom offset guarantees that the spreadsheet will have enough room
+# to take subjective notes. 
+# In other words, we will have at least four merged rows in column B to 
+# take notes. 
+if num_goals < custom_offset:
+	use_custom_offset = True
+
+if use_custom_offset == True:
+	inputData(goal_index,heading_index,custom_offset)
+else:
+	inputData(goal_index,heading_index,num_goals)
 
 wb.save(filename=dest_filename)
 print('\n' + dest_filename + ' created.\n')
