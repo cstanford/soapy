@@ -18,122 +18,145 @@ from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Fo
 parser = argparse.ArgumentParser()
 parser.add_argument('filename')
 args = parser.parse_args()
-filename = args.filename
-dest_dir = 'workbooks'
-dest_filename = dest_dir + '/' + filename + '.xlsx'
-
-
-# create a workbooks directory if one does not exist
-if os.path.isdir(dest_dir) == False:
-	os.makedirs(dest_dir)
-
-
-if os.path.isfile(dest_filename): # open workbook if exists
-	wb = load_workbook(filename = dest_filename)
-	new_wb = False
-else:
-	wb = Workbook()
-	new_wb = True
-
-
-print('\n***********  SOAPY ***********')
-print('Be sure that excel is not open!\n')
-patient = input('Patient name: ' )
-
-if new_wb:
-	ws = wb.active
-	ws.title = patient
-else:
-	if patient in wb.sheetnames: # delete patient's worksheet if it already exists
-		while(True):
-			print('Patient: ' + patient + ' already exists.')
-			selection = int(input('Enter (1) to keep existing patient or (2) to overwrite: '))
-			print('\n')
-			if selection == 2:
-				wb.remove(wb[patient])
-				break
-			elif selection == 1:
-				break
-			else:
-				print('Invalid input. Please enter (1) or (2).')
-
-	ws = wb.create_sheet(title=patient) # create a new sheet for the patient. 
-
-
-num_goals = int(input('Number of goals: ' ))
-goals = []
-
-# get goals from user
-for i in range(0,num_goals):
-	goal = input('Goal ' + str(i + 1) + ': ')
-	goals.append(goal)
-
-
-
-
-# set up print options 
-ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
-ws.print_options.gridLines = True
-ws.page_margins.left = 0.25
-ws.page_margins.right = 0.25
-ws.page_margins.bottom = 0.5
-
 ft_heading = Font(size=11, bold=True)
 
-# merge cells and input patient name
-ws.merge_cells('A1:F1')
-a1 = ws['A1']
-a1.font = ft_heading
-a1.value = 'Pt: ' + patient
-
+# column headings
 header_cells = {'A': 'Date', 'B': 'Subjective Notes', 'C': 'Short-term Goals', 'D': 'Data (+/-)', 'E': 'Cues Given', 'F': 'Assessment/Plan'}
 
 # set appropriate column widths
 column_widths = {'A': 10, 'B': 20, 'C': 35, 'D': 24, 'E': 20, 'F': 20}
-for column, width in column_widths.items():
-	ws.column_dimensions[column].width = width
+
+# set up print options. ws = worksheet
+def print_ops_setup(ws):	
+	ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
+	ws.print_options.gridLines = True
+	ws.page_margins.left = 0.25
+	ws.page_margins.right = 0.25
+	ws.page_margins.bottom = 0.5
 
 # make cell heading
-def insertHeading(startRow):
+def insert_column_headings(ws, startRow):
 	for k, v in header_cells.items():
 		cell = k + str(startRow)
 		ws[cell].font = ft_heading
 		ws[cell].value = v
 
 # insert goals to cells
-def insertGoals(startRow):
-	for goal in range(startRow, num_goals + startRow):
+def insert_patient_goals(ws, startRow, goals):
+	for goal in range(startRow, len(goals) + startRow):
 		cell_num = 'C' + str(goal)
 		cell = ws[cell_num].value = goals[goal - startRow]
 
-def inputData(goal_index, heading_index, offset):
+def input_data(ws, goal_index, heading_index, offset, goals):
 	for i in range(0, 4):
 		ws.merge_cells('B' + str(goal_index) +':B' + str(goal_index + offset - 1)) # merges subjective note cells
-		insertHeading(heading_index)
-		insertGoals(goal_index)
+		insert_column_headings(ws, heading_index)
+		insert_patient_goals(ws, goal_index, goals)
 		heading_index += offset + 3
 		goal_index += offset + 3
 
 
-heading_index = 4 # where to start inserting heading row
-goal_index = 5	# where to start inserting goals
+def soapy(wb, is_new_wb, dest_filename):
+
+	patient_name = input('Patient name: ' )
+
+	if is_new_wb:
+		ws = wb.active
+		ws.title = patient_name
+	else:
+		if patient_name in wb.sheetnames: # delete patient's worksheet if it already exists
+			while(True):
+				print('Patient: \'' + patient_name + '\' already exists.')
+				selection = int(input('Enter (1) to keep existing patient or (2) to overwrite: '))
+				print('\n')
+
+				if selection == 2:
+					wb.remove(wb[patient_name])
+					break
+				elif selection == 1:
+					break
+			else:
+				print('Invalid input. Please enter (1) or (2).')
+
+		ws = wb.create_sheet(title=patient_name) # create a new sheet for the patient. 
 
 
-custom_offset = 4 # Use if num_goals < 4 to make room for subjective notes. 
-use_custom_offset = False
+	print_ops_setup(ws)
 
-# If num_goals < 4, we use a custom offset.
-# The custom offset guarantees that the spreadsheet will have enough room
-# to take subjective notes. 
-# In other words, we will have at least four merged rows in column B to 
-# take notes. 
-if num_goals < custom_offset:
-	use_custom_offset = True
+	num_goals = int(input('Number of goals: ' ))
+	goals = []
 
-if use_custom_offset == True:
-	inputData(goal_index,heading_index,custom_offset)
-else:
-	inputData(goal_index,heading_index,num_goals)
+	# get goals from user
+	for i in range(0,num_goals):
+		goal = input('Goal ' + str(i + 1) + ': ')
+		goals.append(goal)
 
-wb.save(filename=dest_filename)
-print('\nSuccessfully updated ' + dest_filename + '.\n')
+	# merge top row of cells and input patient name
+	ws.merge_cells('A1:F1')
+	a1 = ws['A1']
+	a1.font = ft_heading
+	a1.value = 'Pt: ' + patient_name
+
+	for column, width in column_widths.items():
+		ws.column_dimensions[column].width = width
+
+	heading_index = 4 # where to start inserting heading row
+	goal_index = 5	# where to start inserting goals
+
+	custom_offset = 4 # Use if num_goals < 4 to make room for subjective notes. 
+	use_custom_offset = False
+
+	# If num_goals < 4, we use a custom offset.
+	# The custom offset guarantees that the spreadsheet will have enough room
+	# to take subjective notes. 
+	# In other words, we will have at least four merged rows in column B to 
+	# take notes. 
+	if num_goals < custom_offset:
+		use_custom_offset = True
+
+	if use_custom_offset == True:
+		input_data(ws, goal_index,heading_index,custom_offset, goals)
+	else:
+		input_data(ws, goal_index,heading_index,num_goals, goals)
+
+	wb.save(filename=dest_filename)
+	print('\nSuccessfully updated ' + dest_filename + '.\n')
+
+
+def main():
+	filename = args.filename
+	dest_dir = 'workbooks'
+	dest_filename = dest_dir + '/' + filename + '.xlsx'
+
+	# create a workbooks directory if one does not exist
+	if os.path.isdir(dest_dir) == False:
+		os.makedirs(dest_dir)
+
+	if os.path.isfile(dest_filename): # open workbook if exists
+		wb = load_workbook(filename = dest_filename)
+		is_new_wb = False
+	else:
+		wb = Workbook()
+		is_new_wb = True
+
+	print('\n***********  SOAPY  ***********')
+	print('Be sure that excel is not open!\n')
+
+	while(True):
+		soapy(wb, is_new_wb, dest_filename)
+		# soapy() has already been called so we know that we are
+		# not dealing with a new wb
+		is_new_wb = False
+		print('Would you add another patient to this workbook?')
+		selection = input('(y/n): ')
+		print('\n')
+
+		if selection == 'y':
+			continue
+		else:
+			print('Goodbye <3.')
+			print('*******************************\n')
+			break
+
+main()
+
