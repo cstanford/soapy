@@ -68,12 +68,13 @@ def soapy(wb, is_new_wb, dest_filename):
 			while(True):
 				print('Patient: \'' + patient_name + '\' already exists.')
 				selection = input('Enter (1) to keep existing patient or (2) to overwrite: ')
+				selection = selection.replace(' ', '')
 				print('\n')
-
-				if selection == '1':
+				
+				if selection == '2':
 					wb.remove(wb[patient_name])
 					break
-				elif selection == '2':
+				elif selection == '1':
 					break
 				else:
 					print('Invalid input. Please enter (1) or (2).')
@@ -125,8 +126,19 @@ def soapy(wb, is_new_wb, dest_filename):
 	else:
 		input_data(ws, goal_index,heading_index,num_goals, goals)
 
-	wb.save(filename=dest_filename)
-	print('\nSuccessfully updated ' + dest_filename + '.\n')
+
+	while True:
+		try:
+			wb.save(filename=dest_filename)
+			print('\nSuccessfully updated ' + dest_filename + '.\n')
+			break
+		except:
+			print('Failed to save file.')
+			print('This is probalbly because the file is currently open in excel.')
+			print('Please close the file and try again.\n')
+			selection = input('Press any key to try again. Press (0) to quit application: ')
+			if selection == '0':
+				exit()
 
 
 def main():
