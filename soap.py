@@ -1,9 +1,9 @@
 '''
 *************************************************
 * Soapy                                         *
-* 		                                        *
+*                                               *
 * A Simple script for creating SLP SOAP notes   *
-* in ms excel 									*
+* in ms excel                                   *
 *************************************************
 '''
 
@@ -67,23 +67,29 @@ def soapy(wb, is_new_wb, dest_filename):
 		if patient_name in wb.sheetnames: # delete patient's worksheet if it already exists
 			while(True):
 				print('Patient: \'' + patient_name + '\' already exists.')
-				selection = int(input('Enter (1) to keep existing patient or (2) to overwrite: '))
+				selection = input('Enter (1) to keep existing patient or (2) to overwrite: ')
 				print('\n')
 
-				if selection == 2:
+				if selection == '1':
 					wb.remove(wb[patient_name])
 					break
-				elif selection == 1:
+				elif selection == '2':
 					break
-			else:
-				print('Invalid input. Please enter (1) or (2).')
+				else:
+					print('Invalid input. Please enter (1) or (2).')
 
 		ws = wb.create_sheet(title=patient_name) # create a new sheet for the patient. 
 
 
 	print_ops_setup(ws)
 
-	num_goals = int(input('Number of goals: ' ))
+	while True:
+		try:
+			num_goals = int(input('Number of goals: ' ))
+			break;
+		except ValueError:
+			print('Invalid input. Please enter an integer.')
+
 	goals = []
 
 	# get goals from user
@@ -142,7 +148,7 @@ def main():
 	print('\n***********  SOAPY  ***********')
 	print('Be sure that excel is not open!\n')
 
-	while(True):
+	while True:
 		soapy(wb, is_new_wb, dest_filename)
 		# soapy() has already been called so we know that we are
 		# not dealing with a new wb
