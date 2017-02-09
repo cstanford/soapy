@@ -7,8 +7,8 @@
 *************************************************
 '''
 
-import argparse
 import os
+import argparse
 from openpyxl import Workbook
 from openpyxl import load_workbook
 from openpyxl.compat import range
@@ -19,19 +19,47 @@ parser = argparse.ArgumentParser()
 parser.add_argument('filename')
 args = parser.parse_args()
 filename = args.filename
+dest_dir = 'workbooks'
+dest_filename = dest_dir + '/' + filename + '.xlsx'
 
-# open workbook if exists
-dest_filename = filename + '.xlsx'
-if os.path.isfile(dest_filename):
+
+# create a workbooks directory if one does not exist
+if os.path.isdir(dest_dir) == False:
+	os.makedirs(dest_dir)
+
+
+if os.path.isfile(dest_filename): # open workbook if exists
 	wb = load_workbook(filename = dest_filename)
 	new_wb = False
 else:
 	wb = Workbook()
 	new_wb = True
 
+
 print('\n***********  SOAPY ***********')
 print('Be sure that excel is not open!\n')
 patient = input('Patient name: ' )
+
+if new_wb:
+	ws = wb.active
+	ws.title = patient
+else:
+	if patient in wb.sheetnames: # delete patient's worksheet if it already exists
+		while(True):
+			print('Patient: ' + patient + ' already exists.')
+			selection = int(input('Enter (1) to keep existing patient or (2) to overwrite: '))
+			print('\n')
+			if selection == 2:
+				wb.remove(wb[patient])
+				break
+			elif selection == 1:
+				break
+			else:
+				print('Invalid input. Please enter (1) or (2).')
+
+	ws = wb.create_sheet(title=patient) # create a new sheet for the patient. 
+
+
 num_goals = int(input('Number of goals: ' ))
 goals = []
 
@@ -41,13 +69,7 @@ for i in range(0,num_goals):
 	goals.append(goal)
 
 
-if new_wb:
-	ws = wb.active
-	ws.title = patient
-else:
-	if patient in wb.sheetnames: # delete patient's worksheet if it already exists
-		wb.remove(wb[patient])
-	ws = wb.create_sheet(title=patient) # create a new sheet for the patient. 
+
 
 # set up print options 
 ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
