@@ -16,7 +16,3 @@ $ python3 soap.py myfile
 
 Voila! Follow the instructions on screen to create your SOAP template. 
 
-#### Notes:
-* To add another patient to the same worksheet, simply run the program again with the same filename. 
-* Soapy will overwrite a patient's worksheet if the patient already exists in the workbook. 
-
